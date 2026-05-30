@@ -1,0 +1,14 @@
+{
+    "name": "Pàrquing Familiar",
+    "short_name": "Pàrquing",
+    "description": "App familiar per saber si els pàrquings estan ocupats",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#1a1a2e",
+    "icons": [{
+        "src": "icon.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    }]
+}

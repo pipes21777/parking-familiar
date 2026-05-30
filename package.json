@@ -1,0 +1,12 @@
+{
+    "name": "parking-familiar",
+    "version": "1.0.0",
+    "description": "Servidor WebSocket per sincronitzar estats de pàrquing familiar",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "ws": "^8.16.0"
+    }
+}

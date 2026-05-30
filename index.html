@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Pàrquing Familiar</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .container {
+            background: #16213e;
+            border-radius: 24px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #e94560;
+            text-align: center;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: #8899aa;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+
+        .parking {
+            background: #0f3460;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: background 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .parking.occupied {
+            background: #2d1b1b;
+            border-color: #e94560;
+        }
+
+        .parking.available {
+            background: #0a2e1f;
+            border-color: #2ecc71;
+        }
+
+        .parking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .parking-name {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .occupied .status-badge {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .available .status-badge {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .switch-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .switch-label {
+            color: #8899aa;
+            font-size: 0.85rem;
+        }
+
+        .occupied .switch-label {
+            color: #e94560;
+        }
+
+        .available .switch-label {
+            color: #2ecc71;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #2a2a4a;
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+
+        .slider::before {
+            content: "";
+            position: absolute;
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background: #fff;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .switch input:checked+.slider {
+            background: #e94560;
+        }
+
+        .parking.available .switch input:checked+.slider {
+            background: #2ecc71;
+        }
+
+        .switch input:checked+.slider::before {
+            transform: translateX(28px);
+        }
+
+        .switch input:disabled+.slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .connection-status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #555;
+            transition: background 0.3s;
+        }
+
+        .dot.connected {
+            background: #2ecc71;
+        }
+
+        .dot.disconnected {
+            background: #e94560;
+        }
+
+        .dot.connecting {
+            background: #f39c12;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .last-update {
+            color: #555;
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 16px;
+                border-radius: 16px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .parking {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🅿️ Pàrquing Familiar</h1>
+        <p class="subtitle">Toca l'interruptor per marcar si està ocupat</p>
+
+        <div id="parking1" class="parking available">
+            <div class="parking-header">
+                <span class="parking-name">🚗 Pàrquing 1</span>
+                <span class="status-badge">Lliure</span>
+            </div>
+            <div class="switch-wrapper">
+                <span class="switch-label">Disponible</span>
+                <label class="switch">
+                    <input type="checkbox" id="switch1">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div id="parking2" class="parking available">
+            <div class="parking-header">
+                <span class="parking-name">🚙 Pàrquing 2</span>
+                <span class="status-badge">Lliure</span>
+            </div>
+            <div class="switch-wrapper">
+                <span class="switch-label">Disponible</span>
+                <label class="switch">
+                    <input type="checkbox" id="switch2">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="connection-status">
+            <span class="dot connecting" id="statusDot"></span>
+            <span id="statusText">Connectant...</span>
+        </div>
+        <div class="last-update" id="lastUpdate"></div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════
+        // 👇 POSA AQUÍ LA URL DEL SERVIDOR (Render, Railway, etc.)
+        // ═══════════════════════════════════════════════════════
+        // Exemple: "wss://parking-familiar.onrender.com"
+        // Si ho proves en local: "ws://localhost:3000"
+        const SERVER_URL = "ws://localhost:3000";
+        // ═══════════════════════════════════════════════════════
+
+        let ws = null;
+        let localUpdate = false;
+        let reconnectTimer = null;
+
+        function connect() {
+            updateConnectionStatus('connecting');
+
+            try {
+                ws = new WebSocket(SERVER_URL);
+
+                ws.onopen = () => {
+                    updateConnectionStatus('connected');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const msg = JSON.parse(event.data);
+
+                        if (msg.type === 'state') {
+                            // Rebem l'estat complet al connectar
+                            updateUI(1, msg.data.parking1.occupied);
+                            updateUI(2, msg.data.parking2.occupied);
+                            setLastUpdate();
+                        } else if (msg.type === 'update') {
+                            // Rebem un canvi d'un altre dispositiu
+                            if (!localUpdate) {
+                                updateUI(
+                                    parseInt(msg.parking.replace('parking', '')),
+                                    msg.occupied
+                                );
+                                setLastUpdate();
+                            }
+                            localUpdate = false;
+                        }
+                    } catch (e) {
+                        console.error('Error al processar missatge:', e);
+                    }
+                };
+
+                ws.onclose = () => {
+                    updateConnectionStatus('disconnected');
+                    reconnectLater();
+                };
+
+                ws.onerror = () => {
+                    ws.close();
+                };
+
+            } catch (e) {
+                updateConnectionStatus('disconnected');
+                reconnectLater();
+            }
+        }
+
+        function reconnectLater() {
+            if (reconnectTimer) clearTimeout(reconnectTimer);
+            reconnectTimer = setTimeout(() => {
+                connect();
+            }, 3000);
+        }
+
+        function updateConnectionStatus(status) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+
+            dot.className = 'dot ' + status;
+            const labels = {
+                connected: 'Connectat',
+                disconnected: 'Desconnectat',
+                connecting: 'Connectant...'
+            };
+            text.textContent = labels[status] || status;
+        }
+
+        function updateUI(parking, occupied) {
+            const el = document.getElementById('parking' + parking);
+            const checkbox = document.getElementById('switch' + parking);
+            const badge = el.querySelector('.status-badge');
+            const label = el.querySelector('.switch-label');
+
+            if (occupied) {
+                el.className = 'parking occupied';
+                badge.textContent = 'Ocupat';
+                label.textContent = 'Ocupat';
+            } else {
+                el.className = 'parking available';
+                badge.textContent = 'Lliure';
+                label.textContent = 'Lliure';
+            }
+
+            checkbox.checked = occupied;
+        }
+
+        function setLastUpdate() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('lastUpdate').textContent = 'Última actualització: ' + time;
+        }
+
+        function toggleParking(parking, occupied) {
+            localUpdate = true;
+            updateUI(parking, occupied);
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'toggle',
+                    parking: 'parking' + parking,
+                    occupied: occupied
+                }));
+            }
+
+            setLastUpdate();
+        }
+
+        // Event listeners
+        document.getElementById('switch1').addEventListener('change', function () {
+            toggleParking(1, this.checked);
+        });
+
+        document.getElementById('switch2').addEventListener('change', function () {
+            toggleParking(2, this.checked);
+        });
+
+        // Iniciar connexió
+        connect();
+    </script>
+</body>
+</html>
