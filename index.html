@@ -284,6 +284,11 @@
     </div>
 
     <script>
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
         // ═══════════════════════════════════════════════════════
         // 👇 POSA AQUÍ LA URL DEL SERVIDOR (Render, Railway, etc.)
         // ═══════════════════════════════════════════════════════
